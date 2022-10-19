@@ -1,5 +1,8 @@
 #!/bin/bash -l
 
+#$ -P noc-lab
+#$ -l buyin
+
 #$ -l h_rt=48:00:00
 
 #$ -m e
@@ -16,4 +19,4 @@
 module load miniconda
 
 conda activate /project/onr/vgiammar/RL_env
-python main.py --mode on_off_RL_from_observations --policy AWAC_Q_lambda_Peng --max_iter 100 --data_set modified_human_expert --intrinsic_reward 0.01 --domain_adaptation --seed $1
+python main.py --mode on_off_RL_from_observations --policy AWAC_Q_lambda_Peng --max_iter 200 --data_set modified_human_expert --intrinsic_reward 0.01 --domain_adaptation --seed $1 --Train_encoder
