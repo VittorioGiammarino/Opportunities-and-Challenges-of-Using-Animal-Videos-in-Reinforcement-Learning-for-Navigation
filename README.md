@@ -23,7 +23,7 @@ conda env create -f environment.yml
 conda activate miniconda
 ```
 
-**Step 3.** Download data
+**Step 3.** Download data in main folder
 
 Rodent data: https://drive.google.com/file/d/1UOcu3ViEwylLxntVE8slYx3XQyfGFCBc/view?usp=share_link
 
