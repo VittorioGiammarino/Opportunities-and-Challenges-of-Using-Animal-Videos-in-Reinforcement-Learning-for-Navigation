@@ -13,8 +13,6 @@ import gym
 import pickle
 from gym_minigrid.wrappers import RGBImgObsWrapper, RGBImgPartialObsWrapper, ImgObsWrapper, ActionBonus
 
-from Buffers.vanilla_buffer import ReplayBuffer
-
 import runner
 
 from algorithms.RL.AWAC_GAE import AWAC_GAE
@@ -25,8 +23,6 @@ from algorithms.on_off_RL_observations.on_off_AWAC_Q_lambda_Peng_obs import on_o
 from algorithms.on_off_RL_observations.on_off_AWAC_GAE_obs import on_off_AWAC_GAE_obs
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-#%%
     
 def RL(env, args, seed):
     
@@ -50,13 +46,8 @@ def RL(env, args, seed):
         min_action = np.nan
                 
     state_dim = env.reset().shape
-    
-    #Buffers
-    replay_buffer = ReplayBuffer(args.action_space, state_dim, action_dim)
             
     if args.mode == "on_off_RL_from_observations":
-        
-        replay_buffer_online = ReplayBuffer(args.action_space, state_dim, action_dim)
         
         if args.data_set == 'rodent':
             assert args.env == "MiniGrid-Empty-16x16-v0"
@@ -186,12 +177,10 @@ def train(args, seed):
     
     if args.grid_observability == 'Partial':
         env = RGBImgPartialObsWrapper(env)
+
     elif args.grid_observability == 'Fully':
-        
-        if args.env == "MiniGrid-Empty-32x32-v0":
-            env = RGBImgObsWrapper(env, tile_size=4)
-        else:
-            env = RGBImgObsWrapper(env)
+        env = RGBImgObsWrapper(env)
+
     else:
         print("Special encoding Environmnet")
         
@@ -224,8 +213,8 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     #General
-    parser.add_argument("--mode", default="on_off_RL_from_observations", help='RL, offline_RL, on_off_RL_from_demonstrations, on_off_RL_from_observations')     
-    parser.add_argument("--env", default="MiniGrid-Empty-16x16-v0", help = 'MiniGrid-Empty-16x16-v0 or MiniGrid-Empty-32x32-v0')  
+    parser.add_argument("--mode", default="on_off_RL_from_observations", help='RL, on_off_RL_from_observations')     
+    parser.add_argument("--env", default="MiniGrid-Empty-16x16-v0", help = 'MiniGrid-Empty-16x16-v0')  
     parser.add_argument("--data_set", default="rodent", help="random, human_expert, rodent, modified_human_expert")  
     parser.add_argument("--action_space", default="Discrete")  # Discrete or continuous
     parser.add_argument("--grid_observability", default="Fully", help="Partial or Fully observable")
@@ -233,11 +222,11 @@ if __name__ == "__main__":
     
     parser.add_argument("--policy", default="AWAC_GAE") 
     parser.add_argument("--seed", default=10, type=int)               # Sets Gym, PyTorch and Numpy seeds
-    parser.add_argument("--number_steps_per_iter", default=(2*16*16)*4, type=int) # Number of steps between two evaluations (default Minigrid: 4096)
+    parser.add_argument("--number_steps_per_iter", default=(2*16*16)*4, type=int) # Number of steps between two evaluations (default Minigrid: 2048)
     parser.add_argument("--eval_freq", default=1, type=int)          # How many iterations we evaluate
     parser.add_argument("--max_iter", default=100, type=int)    # Max number of iterations to run environment, max_steps = max_iter*number_steps_per_iter
     parser.add_argument("--Entropy", action="store_true")
-    parser.add_argument("--Train_encoder", action="store_true")
+    parser.add_argument("--Train_encoder", action="store_true") #to train the encoder
     parser.add_argument("--ntrajs", default=5, type=int) #default: 10, number of off-policy trajectories 
     parser.add_argument("--number_obs_per_traj", default=100, type=int) # number of off-policy demonstrations or observations used for training at each iteration (default Minigrid: 100, default Sawyer: 500)
     # RL
@@ -255,9 +244,9 @@ if __name__ == "__main__":
     
     torch.autograd.set_detect_anomaly(args.detect_gradient_anomaly)
     
-    assert args.env == "MiniGrid-Empty-16x16-v0" or args.env == "MiniGrid-Empty-32x32-v0" or args.env == "MiniGrid-FourRooms-v0"
+    assert args.env == "MiniGrid-Empty-16x16-v0" or args.env == "MiniGrid-FourRooms-v0"
         
-    if args.env == "MiniGrid-Empty-16x16-v0" or args.env == "MiniGrid-Empty-32x32-v0":
+    if args.env == "MiniGrid-Empty-16x16-v0":
         args.reward_given = False
         
     if args.mode == "RL":
